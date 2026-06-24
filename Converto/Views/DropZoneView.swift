@@ -5,6 +5,8 @@ import AppKit
 struct DropZoneView: View {
     @Bindable var viewModel: ConverterViewModel
     @State private var isTargeted = false
+    @State private var selectedJobIDs = Set<UUID>()
+    @FocusState private var listFocused: Bool
 
     private let dropTypes: [UTType] = [.fileURL, .image, .url]
 
@@ -38,9 +40,9 @@ struct DropZoneView: View {
                 Image(systemName: "photo.on.rectangle.angled")
                     .font(.system(size: 36))
                     .foregroundStyle(.secondary)
-                Text("Drop images here")
+                Text(.dropImagesHere)
                     .font(.title3)
-                Text("or click to browse")
+                Text(.orClickToBrowse)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -55,30 +57,31 @@ struct DropZoneView: View {
             if viewModel.jobs.isEmpty {
                 VStack {
                     Spacer()
-                    Text("No images added yet")
+                    Text(.noImagesAdded)
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
             } else {
-                List {
+                List(selection: $selectedJobIDs) {
                     ForEach(viewModel.jobs) { job in
                         JobRowView(job: job)
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            viewModel.removeJob(id: viewModel.jobs[index].id)
-                        }
+                            .tag(job.id)
                     }
                 }
                 .listStyle(.inset)
+                .focused($listFocused)
+                .onAppear { listFocused = true }
+                .onDeleteCommand(perform: deleteSelectedJobs)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if !viewModel.jobs.isEmpty {
-                    Button("Clear") {
+                    Button {
                         viewModel.clearJobs()
+                    } label: {
+                        Text(.clear)
                     }
                     .disabled(viewModel.isConverting)
                 }
@@ -95,6 +98,12 @@ struct DropZoneView: View {
         if panel.runModal() == .OK {
             viewModel.addFiles(urls: panel.urls)
         }
+    }
+
+    private func deleteSelectedJobs() {
+        guard !selectedJobIDs.isEmpty else { return }
+        viewModel.removeJobs(ids: selectedJobIDs)
+        selectedJobIDs = Set(viewModel.jobs.map(\.id)).intersection(selectedJobIDs)
     }
 }
 

@@ -27,7 +27,7 @@ struct FormatRegistry {
         process.waitUntilExit()
 
         guard process.terminationStatus == 0 else {
-            throw ConversionError.conversionFailed("Failed to list ImageMagick formats.")
+            throw ConversionError.conversionFailed(L10n.listFormatsFailed())
         }
 
         let data = pipe.fileHandleForReading.readDataToEndOfFile()

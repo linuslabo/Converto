@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import Observation
 
 @Observable
@@ -15,6 +16,7 @@ final class ConverterViewModel {
     var magickURL: URL?
     var imageMagickError: String?
     var showFormatSettings = false
+    var showOutputFolderButton = false
 
     var visibleFormats: [ImageFormat] {
         let idSet = Set(visibleFormatIDs.map { $0.uppercased() })
@@ -94,21 +96,33 @@ final class ConverterViewModel {
     }
 
     func addFiles(urls: [URL]) {
-        let existing = Set(jobs.map(\.inputURL))
-        let imageURLs = urls.filter { url in
-            !existing.contains(url) && isImageFile(url)
+        for url in urls where isImageFile(url) {
+            let normalized = normalizedURL(url)
+            if let index = jobs.firstIndex(where: { normalizedURL($0.inputURL) == normalized }) {
+                if case .converting = jobs[index].status { continue }
+                jobs[index].status = .pending
+            } else {
+                jobs.append(ConversionJob(inputURL: url))
+            }
         }
-        jobs.append(contentsOf: imageURLs.map { ConversionJob(inputURL: $0) })
     }
 
     func removeJob(id: UUID) {
-        guard !isConverting else { return }
-        jobs.removeAll { $0.id == id }
+        removeJobs(ids: [id])
+    }
+
+    func removeJobs(ids: Set<UUID>) {
+        jobs.removeAll { job in
+            guard ids.contains(job.id) else { return false }
+            if case .converting = job.status { return false }
+            return true
+        }
     }
 
     func clearJobs() {
         guard !isConverting else { return }
         jobs.removeAll()
+        showOutputFolderButton = false
     }
 
     func updateVisibleFormats(_ ids: [String]) {
@@ -122,6 +136,7 @@ final class ConverterViewModel {
         guard folderMode == .sameAsSource || customOutputFolder != nil else { return }
 
         isConverting = true
+        showOutputFolderButton = false
 
         let settings = ConversionSettings(
             outputFormat: format,
@@ -186,6 +201,23 @@ final class ConverterViewModel {
         }
 
         isConverting = false
+        showOutputFolderButton = completedCount > 0
+    }
+
+    func openOutputFolder() {
+        let outputURLs = jobs.compactMap { job -> URL? in
+            if case .done(let url) = job.status { return url }
+            return nil
+        }
+        guard !outputURLs.isEmpty else { return }
+
+        if folderMode == .custom, let customOutputFolder {
+            NSWorkspace.shared.open(customOutputFolder)
+        } else if outputURLs.count == 1, let url = outputURLs.first {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        } else {
+            NSWorkspace.shared.activateFileViewerSelecting(outputURLs)
+        }
     }
 
     private func normalizeSelectedFormat() {
@@ -194,6 +226,10 @@ final class ConverterViewModel {
             return
         }
         selectedFormatID = visibleFormats.first?.id ?? "JPEG"
+    }
+
+    private func normalizedURL(_ url: URL) -> URL {
+        url.standardizedFileURL.resolvingSymlinksInPath()
     }
 
     private func isImageFile(_ url: URL) -> Bool {

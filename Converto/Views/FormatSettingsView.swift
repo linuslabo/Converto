@@ -11,9 +11,9 @@ struct FormatSettingsView: View {
             VStack(spacing: 0) {
                 if filteredFormats.isEmpty {
                     ContentUnavailableView(
-                        "No formats found",
+                        String(localized: .noFormatsFound),
                         systemImage: "magnifyingglass",
-                        description: Text("Try a different search or refresh ImageMagick.")
+                        description: Text(.formatSearchHint)
                     )
                 } else {
                     List {
@@ -40,24 +40,36 @@ struct FormatSettingsView: View {
                     }
                 }
             }
-            .navigationTitle("Visible Formats")
-            .searchable(text: $searchText, prompt: "Search formats")
+            .navigationTitle(String(localized: .visibleFormats))
+            .searchable(text: $searchText, prompt: String(localized: .searchFormats))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text(.done)
+                    }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Menu("Presets") {
-                        Button("Common formats") {
+                    Menu {
+                        Button {
                             applyPreset(ImageFormat.defaultVisibleFormatIDs)
+                        } label: {
+                            Text(.commonFormats)
                         }
-                        Button("Select all") {
+                        Button {
                             applyPreset(viewModel.allFormats.map(\.id))
+                        } label: {
+                            Text(.selectAll)
                         }
-                        Button("Clear all") {
+                        Button {
                             selectedIDs = []
                             persist()
+                        } label: {
+                            Text(.clearAll)
                         }
+                    } label: {
+                        Text(.presets)
                     }
                 }
             }

@@ -39,9 +39,9 @@ enum ConversionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingOutputFolder:
-            return "Choose an output folder."
+            return L10n.missingOutputFolder
         case .imageMagickNotFound:
-            return "ImageMagick was not found. Install it with: brew install imagemagick"
+            return L10n.imageMagickNotFound
         case .conversionFailed(let message):
             return message
         }

@@ -50,6 +50,18 @@ magick input.jpg -quality 85 output.webp
 
 The app discovers writable formats via `magick -list format` and runs conversions in parallel with bounded concurrency.
 
+## Localization
+
+The UI is localized via `Converto/Localization/Localizable.xcstrings` (String Catalog). Supported languages:
+
+English, Spanish, French, German, Italian, Portuguese (Brazil & Portugal), Japanese, Korean, Chinese (Simplified & Traditional), Russian, Arabic, Dutch, Polish, Turkish, Hindi, Indonesian, Ukrainian, and Swedish.
+
+macOS uses your system language automatically. To add or update translations, edit the catalog or run:
+
+```bash
+python3 Scripts/generate_localizations.py
+```
+
 ## License
 
 This application is licensed under the [MIT License](LICENSE).

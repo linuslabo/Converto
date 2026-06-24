@@ -13,8 +13,10 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItem(placement: .automatic) {
-                Button("Formats…") {
+                Button {
                     viewModel.showFormatSettings = true
+                } label: {
+                    Text(.formatsMenu)
                 }
             }
         }

@@ -9,33 +9,41 @@ struct ImageMagickSetupView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 16) {
-                Label("ImageMagick required", systemImage: "exclamationmark.triangle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.primary)
+                Label {
+                    Text(.imageMagickRequired)
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                }
+                .font(.title2)
+                .foregroundStyle(.primary)
 
-                Text(viewModel.imageMagickError ?? "ImageMagick 7 was not found on this Mac.")
+                Text(viewModel.imageMagickError ?? L10n.imageMagickNotFoundOnMac)
                     .foregroundStyle(.secondary)
 
-                Text("Install with Homebrew:")
+                Text(.installWithHomebrew)
                     .font(.headline)
 
-                Text("brew install imagemagick")
+                Text(L10n.brewInstallCommand)
                     .font(.system(.body, design: .monospaced))
                     .padding(8)
                     .background(Color(nsColor: .textBackgroundColor))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
 
-                Text("Or set a custom path in Converto → Settings.")
+                Text(.customPathHint)
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
                 HStack {
                     Spacer()
-                    Button("Open Settings") {
+                    Button {
                         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                    } label: {
+                        Text(.openSettings)
                     }
-                    Button("Retry") {
+                    Button {
                         viewModel.refreshImageMagick()
+                    } label: {
+                        Text(.retry)
                     }
                     .buttonStyle(.borderedProminent)
                 }

@@ -6,38 +6,52 @@ struct AppSettingsView: View {
 
     var body: some View {
         Form {
-            Section("ImageMagick") {
+            Section {
                 if let magickURL = viewModel.magickURL {
-                    LabeledContent("Detected") {
+                    LabeledContent(String(localized: .detected)) {
                         Text(magickURL.path)
                             .font(.caption)
                             .textSelection(.enabled)
                     }
                 } else {
-                    Text("Not detected")
+                    Text(.notDetected)
                         .foregroundStyle(.secondary)
                 }
 
-                TextField("Custom magick path", text: $customPath, prompt: Text("/opt/homebrew/bin/magick"))
-                    .textFieldStyle(.roundedBorder)
+                TextField(
+                    String(localized: .customMagickPath),
+                    text: $customPath,
+                    prompt: Text(.magickPathPlaceholder)
+                )
+                .textFieldStyle(.roundedBorder)
 
                 HStack {
-                    Button("Apply") {
+                    Button {
                         viewModel.setCustomMagickPath(customPath)
+                    } label: {
+                        Text(.apply)
                     }
-                    Button("Clear") {
+                    Button {
                         customPath = ""
                         viewModel.setCustomMagickPath("")
+                    } label: {
+                        Text(.clear)
                     }
                     Spacer()
-                    Button("Refresh") {
+                    Button {
                         viewModel.refreshImageMagick()
+                    } label: {
+                        Text(.refresh)
                     }
                 }
+            } header: {
+                Text(.sectionImageMagick)
             }
 
             Section {
-                Link("ImageMagick documentation", destination: URL(string: "https://imagemagick.org")!)
+                Link(destination: URL(string: "https://imagemagick.org")!) {
+                    Text(.imageMagickDocs)
+                }
             }
         }
         .formStyle(.grouped)

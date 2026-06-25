@@ -2,6 +2,10 @@
 
 A simple, open-source macOS app for bulk image format conversion. Drop images, pick an output format and quality, and convert them all at once using [ImageMagick](https://imagemagick.org).
 
+## Screenshot
+
+![Converto app screenshot](./converto-screenshot.png)
+
 ## Features
 
 - Drag-and-drop or browse for multiple images
